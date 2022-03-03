@@ -32,7 +32,7 @@ def visualizeTrajectory(traj_lst, cluster_lst):
             plt.plot(traj[:, 0], traj[:, 1], c='k', linestyle='dashed')
         else:
             plt.plot(traj[:, 0], traj[:, 1], c=color_lst[cluster % len(color_lst)])
-    #plt.show()
+    plt.show()
 
 sns.set()
 plt.rcParams['figure.figsize'] = (12, 12)
@@ -41,7 +41,7 @@ color_lst.extend(['firebrick', 'olive', 'indigo', 'khaki', 'teal', 'saddlebrown'
                  'skyblue', 'coral', 'darkorange'])
 
 columns = ["POLYLINE"]
-df = pd.read_csv("trajectory.csv", usecols=columns)
+df = pd.read_csv("trajectory.csv", usecols=columns,nrows =20) #Reading only 20 lines to see comparison between original and rdp trajectory
 
 traj_lst = []
 for index,row in df.iterrows():
@@ -55,10 +55,31 @@ for it in traj_lst:
     arr = np.asarray(it['trajectory'])
     traj_arr.append(arr)
 
-#for traj in traj_arr:
-    #plt.plot(traj[:, 0], traj[:, 1])
+beforeRDP_traj_arr = traj_arr.copy()
 
-degree_threshold = 5
+# for traj in beforeRDP_traj_arr:
+#     print("Intitial length")
+#     print(len(traj))
+#     plt.plot(traj[:, 0], traj[:, 1])
+# plt.show()
+
+
+# beforeRDP_df = pd.read_csv("trajectory.csv", usecols=columns,nrows =20) #Reading only 20 lines to see comparison between original and rdp trajectory
+# beforeRDP_traj_lst = []
+# for index,row in beforeRDP_df.iterrows():
+#     temp = {}
+#     temp['trajectory'] = literal_eval(row[0])
+#     beforeRDP_traj_lst.append(temp)
+    
+# beforeRDP_traj_arr = []
+
+# for it in beforeRDP_traj_lst:
+#     arr = np.asarray(it['trajectory'])
+#     beforeRDP_traj_arr.append(arr)
+
+
+
+degree_threshold = 30  #Can be modified to see variation in trajectory after rdp
 
 for traj_index, traj in enumerate(traj_arr):
     
@@ -69,13 +90,20 @@ for traj_index, traj in enumerate(traj_arr):
         next_point = traj[point_index + 1]
         diff_vector = next_point - point
         azimuth = (math.degrees(math.atan2(*diff_vector)) + 360) % 360
-        
         if abs(azimuth - previous_azimuth) > degree_threshold:
             hold_index_lst.append(point_index)
             previous_azimuth = azimuth
     hold_index_lst.append(traj.shape[0] - 1)
     
     traj_arr[traj_index] = traj[hold_index_lst, :]
+
+
+rdp_traj = traj_arr
+# for traj in rdp_traj:
+#     print("After reduction length")
+#     print(len(traj))
+#     plt.plot(traj[:, 0], traj[:, 1])
+# plt.show()
 
 
 def hausdorff( u, v):
@@ -92,7 +120,7 @@ for i in range(traj_count):
         D[j, i] = distance
 
 
-k = 6 # The number of clusters
+k = 3 # The number of clusters
 medoid_center_lst, cluster2index_lst = kMedoids(D, k)
 
 cluster_lst = np.empty((traj_count,), dtype=int)
@@ -105,7 +133,7 @@ for cluster in cluster2index_lst:
 # print("Traj list: ")
 # print(traj_ls[3])
 
-visualizeTrajectory(traj_arr, cluster_lst)
+#visualizeTrajectory(traj_arr, cluster_lst)
 
 
 # mdl = DBSCAN(eps=1000, min_samples=5)
@@ -128,6 +156,18 @@ for i in range(0,len(traj_arr)):
     temp['trajectory'] = traj_arr[i].tolist()
     api_res1.append(temp)
 
+
+api_res_BeforeRdp = []
+for i in range(0,len(beforeRDP_traj_arr)):
+    temp = {}
+    temp['trajectory'] = beforeRDP_traj_arr[i].tolist()
+    api_res_BeforeRdp.append(temp)
+
+
+# for traj in beforeRDP_traj_arr:
+#     print("Intitial length")
+#     print(len(traj))
+
 from flask import Flask
 app = Flask(__name__)
 @app.route('/getclusters/', methods=['GET'])
@@ -147,4 +187,13 @@ def getTrajectories():
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
-app.run(host="0.0.0.0")
+@app.route('/getBeforeRDPTrajectories/', methods=['GET'])
+def getBeforeRDPTrajectories():
+    res_dict = {}
+    res_dict['data'] = api_res_BeforeRdp
+    
+    response = jsonify(res_dict)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
+app.run(host="127.0.0.1")
