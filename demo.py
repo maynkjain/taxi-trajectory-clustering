@@ -164,6 +164,17 @@ for i in range(0,len(beforeRDP_traj_arr)):
     api_res_BeforeRdp.append(temp)
 
 
+api_SingleTraj_BeforeRDP = []
+temp1 = {}
+temp1['trajectory'] = beforeRDP_traj_arr[0].tolist()
+api_SingleTraj_BeforeRDP.append(temp1)
+
+
+api_SingleTraj_AfterRDP = []
+temp2 = {}
+temp2['trajectory'] = traj_arr[0].tolist()
+api_SingleTraj_AfterRDP.append(temp2)
+
 # for traj in beforeRDP_traj_arr:
 #     print("Intitial length")
 #     print(len(traj))
@@ -195,5 +206,24 @@ def getBeforeRDPTrajectories():
     response = jsonify(res_dict)
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
+
+@app.route('/getBefore_SingleRDPTrajectory/', methods=['GET'])
+def getBefore_SingleRDPTrajectory():
+    res_dict = {}
+    res_dict['data'] = api_SingleTraj_BeforeRDP
+    
+    response = jsonify(res_dict)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
+@app.route('/getAfter_SingleRDPTrajectory/', methods=['GET'])
+def getAfter_SingleRDPTrajectory():
+    res_dict = {}
+    res_dict['data'] = api_SingleTraj_AfterRDP
+    
+    response = jsonify(res_dict)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
 
 app.run(host="127.0.0.1")
