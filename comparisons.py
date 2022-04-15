@@ -160,14 +160,14 @@ for traj in beforeVW_traj_arr:
     vw_points.append(arr)
 
 def plotGraphForComparison(initial,afterRDP,afterVW):
-    header = ['original points', 'after rdp points', 'after vw points']
+    header = ['index','original points', 'after rdp points', 'after vw points']
 
     finaldata =[]
     for i in range(0, len(initial)):
         originalpoints = len(initial[i])
         afterRDPpoints = len(afterRDP[i])
         afterVWpoints = len(afterVW[i])
-        data = [originalpoints, afterRDPpoints, afterVWpoints]
+        data = [i+1,originalpoints, afterRDPpoints, afterVWpoints]
         finaldata.append(data)
 
     with open('comparison.csv', 'w', encoding='UTF8') as f:
