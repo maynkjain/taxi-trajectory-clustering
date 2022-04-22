@@ -258,14 +258,14 @@ api_SingleTraj_AfterVW.append(temp3)
 
 
 def plotGraphForComparison(initial,afterRDP,afterVW):
-    header = ['original points', 'after rdp points', 'after vw points']
+    header = ['index','original_points', 'after_rdp_points', 'after_vw_points']
 
     finaldata =[]
     for i in range(0, len(initial)):
         originalpoints = len(initial[i])
         afterRDPpoints = len(afterRDP[i])
         afterVWpoints = len(afterVW[i])
-        data = [originalpoints, afterRDPpoints, afterVWpoints]
+        data = [i+1,originalpoints, afterRDPpoints, afterVWpoints]
         finaldata.append(data)
 
     with open('comparison.csv', 'w', encoding='UTF8') as f:
